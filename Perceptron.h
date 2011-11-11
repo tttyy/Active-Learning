@@ -10,17 +10,17 @@
 
 class Perceptron {
 protected:
-	int d, t, cor;
+	int d, t, L;
 	double *v;
 
 	double dotProduct(double[], double[], int);
 
 public:
 	Perceptron();
-	Perceptron(int dim);
+	Perceptron(int dim, int label);
 	~Perceptron();
 
-	double read(double [], int);
+	bool read(double [], int);
 	bool predict(double [], int);
 };
 
