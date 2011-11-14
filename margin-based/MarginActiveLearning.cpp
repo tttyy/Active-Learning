@@ -8,6 +8,8 @@
  */
 
 #include "MarginActiveLearning.h"
+#include "DataPoint.h"
+#include "linear.h"
 #include <vector>
 #include <cstdio>
 #include <cmath>
@@ -23,7 +25,7 @@ MarginActiveLearning::MarginActiveLearning(int d)
     this->dimension = d;
     this->n_label = 0;
     this->weight = new double[d];
-    this->working_sets = std::vector<DataPoint>();
+    this->working_set = std::vector<DataPoint>();
 };
 
 MarginActiveLearning::~MarginActiveLearning()
@@ -61,7 +63,7 @@ bool MarginActiveLearning::add_point(DataPoint point, double b)
 {
     double margin = this->margin(point);
     if (margin < b) {
-        this->working_sets.push_back(point);
+        this->working_set.push_back(point);
         return true;
     }
     return false;
@@ -69,6 +71,37 @@ bool MarginActiveLearning::add_point(DataPoint point, double b)
 
 void MarginActiveLearning::update_weight()
 {
+    struct problem prob;
+    prob.l = this->working_set.size();
+    prob.y = Malloc(int, prob.l);
+    prob.x = Malloc(struct feature_node*, prob.l);
+    feature_node* x_space = Malloc(struct feature_node, prob.l * (dimension+1) );
+    
+    int j = 0;
+    for (int i = 0; i < prob.l; i++) {
+        prob.x[i] = &x_space[j];
+        prob.y[i] = this->working_set[i].label;
+        for (int k = 0; k < dimension; k++) {
+            x_space[j].index = k;
+            x_space[j].value = this->working_set[i].x[k];
+        }
+        x_space[dimension].index = -1;
+    }
+    
+    // default values
+    struct parameter *param = Malloc(struct parameter, 1);
+    param->solver_type = L2R_L2LOSS_SVC_DUAL;
+    param->C = 1;
+    param->nr_weight = 0;
+    param->weight = NULL;
+    param->weight_label = NULL;
+    
+    struct model *model = train(&prob, param);
+    for (int i = 0; i < dimension; i++) {
+        this->weight[i] = model->w[i];
+    }
+    free_model_content(model);
+    destroy_param(param);
 };
 
 void MarginActiveLearning::build_model_separable(std::vector<DataPoint> data_vec, double epsilon, double delta, int C)

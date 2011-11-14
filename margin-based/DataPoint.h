@@ -14,7 +14,8 @@ class DataPoint {
 public:
     int dimension;
     double* x;
-    DataPoint(int d, double* xvec);
+    int label;
+    DataPoint(int d, double* xvec, int l);
     ~DataPoint();
     DataPoint clone();
 };

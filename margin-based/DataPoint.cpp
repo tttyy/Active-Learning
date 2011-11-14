@@ -10,22 +10,22 @@
 #include "DataPoint.h"
 #include <cstdlib>
 
-DataPoint::DataPoint(int d, double* xvec)
+DataPoint::DataPoint(int d, double* xvec, int l)
 {
     this->dimension = d;
     this->x = new double[d];
     for (int i = 0; i < d; i++) {
         this->x[i] = xvec[i];
     }
+    this->label = l;
 };
 
 DataPoint::~DataPoint()
 {
     delete[] this->x;
-    this->x = NULL;
 }
 
 DataPoint DataPoint::clone()
 {
-    return DataPoint(this->dimension, this->x);
+    return DataPoint(this->dimension, this->x, this->label);
 }

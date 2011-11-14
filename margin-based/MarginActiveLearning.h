@@ -18,7 +18,7 @@ public:
     int dimension;
     int n_label;
     double* weight;
-    std::vector<DataPoint> working_sets;
+    std::vector<DataPoint> working_set;
     
     //constructor
     MarginActiveLearning(int d);
