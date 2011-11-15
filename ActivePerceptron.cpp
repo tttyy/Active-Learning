@@ -59,3 +59,13 @@ bool ActivePerceptron::read(double x[], int y) {
 		}
 	}
 }
+
+int ActivePerceptron::computeL(int d, double delta, double epsilon)
+{
+	return (double)d*log(1/delta/epsilon)*(log((double)d/delta)+log(log(1/epsilon)));
+}
+
+int ActivePerceptron::computeR(int d, double delta, double epsilon)
+{
+	return log((double)d/delta)+log(log(1/epsilon));
+}

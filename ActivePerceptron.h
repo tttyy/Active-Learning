@@ -12,5 +12,8 @@ public:
 	~ActivePerceptron(void);
 
 	bool read(double [], int);
+
+	static int computeL(int d, double delta, double epsilon);
+	static int computeR(int d, double delta, double epsilon);
 };
 
