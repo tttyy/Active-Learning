@@ -4,13 +4,16 @@ class ActivePerceptron :
 	public Perceptron
 {
 private:
-	int L, R, con, num;
+	int R, con, num;
 	double s;
 
 public:
 	ActivePerceptron(int dim, int label, int pat);
 	~ActivePerceptron(void);
 
-	double read(double [], int);
+	bool read(double [], int);
+
+	static int computeL(int d, double delta, double epsilon);
+	static int computeR(int d, double delta, double epsilon);
 };
 

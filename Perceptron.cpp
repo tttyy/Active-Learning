@@ -11,13 +11,13 @@
 
 Perceptron::Perceptron() {}
 
-Perceptron::Perceptron(int dim) {
+Perceptron::Perceptron(int dim, int label) {
 	// TODO Auto-generated constructor stub
 	d = dim;
+	L = label;
 	v = new double[d];
 	for (int i=0;i<d;i++) v[i]=0;
 	t = 0;
-	cor = 0;	// Number of correct predictions
 }
 
 Perceptron::~Perceptron() {
@@ -33,20 +33,21 @@ double Perceptron::dotProduct(double a[], double b[], int n)
 	return sum;
 }
 
-double Perceptron::read(double x[], int y) {
+bool Perceptron::read(double x[], int y) {
 	t++;
 
 	double p = dotProduct(x,v,d);
 	if ((p>=0 && y<0) || (p<0 && y>0))
 	{
-		for (int i=0;i<d;i++)
-			v[i]+=y*x[i];
+		if (t<=L)
+			for (int i=0;i<d;i++)
+				v[i]+=y*x[i];
+		return false;
 	}
 	else
 	{
-		cor++;
+		return true;
 	}
-	return (double)cor/(double)t;
 }
 
 bool Perceptron::predict(double x[], int y) {

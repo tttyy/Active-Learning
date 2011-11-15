@@ -12,7 +12,6 @@ ActivePerceptron::ActivePerceptron(int dim, int label, int pat)
 	t = 0;
 	con = 0;	// Number of consistently correct labels
 	num = 0;	// Number of requested labels
-	cor = 0;	// Number of correct predictions
 }
 
 
@@ -20,7 +19,7 @@ ActivePerceptron::~ActivePerceptron(void)
 {
 }
 
-double ActivePerceptron::read(double x[], int y) {
+bool ActivePerceptron::read(double x[], int y) {
 	t++;
 	if (t==1)
 	{
@@ -28,7 +27,7 @@ double ActivePerceptron::read(double x[], int y) {
 		s = 1/ sqrt((double)d);
 		con ++;
 		num++;
-		cor++;
+		return true;
 	}
 	else
 	{
@@ -41,23 +40,32 @@ double ActivePerceptron::read(double x[], int y) {
 				con = 0;
 				for (int i=0;i<d;i++)
 					v[i]-=2*p*x[i];
+				return false;
 			}
 			else
 			{
 				con++;
-				cor++;
 				if (con == R)
 				{
 					s/=2;
 					con = 0;
 				}
+				return true;
 			}
 		}
 		else
 		{
-			if (predict(x, y))
-				cor++;
+			return predict(x, y);
 		}
 	}
-	return (double)cor/(double)t;
+}
+
+int ActivePerceptron::computeL(int d, double delta, double epsilon)
+{
+	return (double)d*log(1/delta/epsilon)*(log((double)d/delta)+log(log(1/epsilon)));
+}
+
+int ActivePerceptron::computeR(int d, double delta, double epsilon)
+{
+	return log((double)d/delta)+log(log(1/epsilon));
 }
