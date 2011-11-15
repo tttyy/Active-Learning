@@ -303,7 +303,7 @@ double Qbc::error()
 	err = abs(this->target - this->output());
 	if(err > 180)
 		err = 360.000000 - err;
-	err = err / 360.000000;
+	err = err / 180.000000;
 	cout << err << endl;
 	return err;
 }
