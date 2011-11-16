@@ -16,6 +16,7 @@ public:
     double* x;
     int label;
     DataPoint(int d, double* xvec, int l);
+	DataPoint(const DataPoint &dp);
     ~DataPoint();
     DataPoint clone();
 };

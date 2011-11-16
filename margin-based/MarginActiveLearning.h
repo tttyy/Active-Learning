@@ -38,9 +38,9 @@ public:
     /**
      * train the model in separable scenario
      */
-    void build_model_separable_iter(std::vector<DataPoint> &data_vec);
+    bool build_model_separable_iter(std::vector<DataPoint> &data_vec);
     void build_model_separable(std::vector<DataPoint> &data_vec);
-    
+    int getNumberOfLabel();
 };
 
 #endif

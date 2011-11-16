@@ -20,6 +20,16 @@ DataPoint::DataPoint(int d, double* xvec, int l)
     this->label = l;
 };
 
+DataPoint::DataPoint(const DataPoint &dp)
+{
+	this->dimension = dp.dimension;
+	this->x = new double[dp.dimension];
+	for (int i = 0; i < dp.dimension; i++) {
+		this->x[i] = dp.x[i];
+    }
+	this->label = dp.label;
+}
+
 DataPoint::~DataPoint()
 {
     delete[] this->x;

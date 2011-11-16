@@ -21,6 +21,7 @@ ActivePerceptron::~ActivePerceptron(void)
 
 bool ActivePerceptron::read(double x[], int y) {
 	t++;
+	double p;
 	if (t==1)
 	{
 		for (int i=0;i<d;i++) v[i]=x[i]*y;
@@ -31,7 +32,7 @@ bool ActivePerceptron::read(double x[], int y) {
 	}
 	else
 	{
-		double p = dotProduct(x,v,d);
+		p = dotProduct(x,v,d);
 		if (num<L && abs(p)<=s)
 		{
 			num++;
@@ -68,4 +69,9 @@ int ActivePerceptron::computeL(int d, double delta, double epsilon, double c)
 int ActivePerceptron::computeR(int d, double delta, double epsilon, double c)
 {
 	return c*log((double)d/delta)+log(log(1/epsilon));
+}
+
+int ActivePerceptron::getNumberOfLabel()
+{
+	return num;
 }

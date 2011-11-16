@@ -102,10 +102,12 @@ void MarginActiveLearning::update_weight()
 /**
  * This function will perform one more iteration of training
  */
-void MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &data_vec)
+bool MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &data_vec)
 {
     if(this->k >= n_iteration)
-        return;
+        return false;
+	std::random_shuffle(data_vec.begin(), data_vec.end());
+
     double d = (double) this->dimension;
     int m = (int)(C * sqrt(d) * (d * log(d) + log(this->k / this->delta)));
     double b = M_PI / pow(2.0, this->k - 1);
@@ -126,6 +128,8 @@ void MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
     }
     this->k += 1;
     update_weight();
+
+	return true;
 }
 
 /**
@@ -134,7 +138,11 @@ void MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
 void MarginActiveLearning::build_model_separable(std::vector<DataPoint> &data_vec)
 {
     while(this->k < n_iteration) {
-        std::random_shuffle(data_vec.begin(), data_vec.end());
         this->build_model_separable_iter(data_vec);
     }
+}
+
+int MarginActiveLearning::getNumberOfLabel()
+{
+	return n_label;
 }

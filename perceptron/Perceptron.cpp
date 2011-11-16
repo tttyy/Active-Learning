@@ -53,3 +53,8 @@ bool Perceptron::read(double x[], int y) {
 bool Perceptron::predict(double x[], int y) {
 	return dotProduct(x,v,d)*y>=0;
 }
+
+void Perceptron::setL(int in)
+{
+	this->L = in;
+}

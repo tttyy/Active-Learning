@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include "stdlib.h"
+#include "math.h"
 
 // Generate an d-dimensional array of random numbers between -0.5 and 0.5
 // Assuming that the seed is setup elsewhere
@@ -24,4 +25,14 @@ int classify(double x[], int d)
 		return 1;
 	else
 		return -1;
+}
+
+void normalize(double *x, int d)
+{
+	double sum = 0;
+	for (int i=0;i<d;i++)
+		sum+=x[i]*x[i];
+	sum = sqrt(sum);
+	for (int i=0;i<d;i++)
+		x[i]/=sum;
 }

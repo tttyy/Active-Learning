@@ -12,6 +12,7 @@ public:
 	~ActivePerceptron(void);
 
 	bool read(double [], int);
+	int getNumberOfLabel();
 
 	static int computeL(int d, double delta, double epsilon, double c);
 	static int computeR(int d, double delta, double epsilon, double c);
