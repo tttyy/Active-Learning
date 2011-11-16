@@ -109,8 +109,8 @@ void MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
     double d = (double) this->dimension;
     int m = (int)(C * sqrt(d) * (d * log(d) + log(this->k / this->delta)));
     double b = M_PI / pow(2.0, this->k - 1);
-    this->working_set = std::vector<DataPoint>();
 
+    int n_labeled = 0;
     for(int i = 0; i < data_vec.size(); i++) {
         /**
          * Try to add a DataPoint point. If the margin of point is less than b,
@@ -119,8 +119,9 @@ void MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
         */
         if(this->margin(data_vec[i]) < b) {
             this->working_set.push_back(data_vec[i]);
+            n_labeled++;
         }
-        if(this->working_set.size() > m)
+        if(n_labeled > m)
             break;
     }
     this->k += 1;
