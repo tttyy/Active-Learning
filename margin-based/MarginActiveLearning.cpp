@@ -8,7 +8,7 @@
  */
 
 #include "MarginActiveLearning.h"
-#include "DataPoint.h"
+#include "../DataPoint.h"
 #include "linear.h"
 #include <vector>
 #include <cstdio>

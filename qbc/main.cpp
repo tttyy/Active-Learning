@@ -1,5 +1,5 @@
 #include "qbc.h"
-#include "Tokenizer.h"
+#include "../Tokenizer.h"
 
 using namespace std;
 
@@ -35,8 +35,8 @@ int main()
 	double number = 0;
 	double temp;
 	double e[100];
-	char* train_set = "train.txt";
-	char* test_set = "test.txt";
+	char* train_set = "../data/train.txt";
+	char* test_set = "../data/test.txt";
 
 	srand((unsigned)time(0));
 	
