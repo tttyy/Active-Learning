@@ -116,9 +116,18 @@ void MarginActiveLearning::build_model_separable(std::vector<DataPoint> data_vec
         int m = C * sqrt(d) * (d * log(d) + log(k / delta));
         double b = M_PI / pow(2.0, k-1);
 
+	int n_labeled = 0;
         std::random_shuffle(data_vec.begin(), data_vec.end());
-        for (int j = 0; j < m; j++) {
-            this->add_point(data_vec[j], b);
+        while(1) {
+	    if(n_labeled > m)
+		    break;
+            if (this->add_point(data_vec[j], b))
+		    n_labeled++;
+	    if (j == data_vec.size)
+		    j = 0;
+	    else
+		    j++;
+	    
         }
         
     }
