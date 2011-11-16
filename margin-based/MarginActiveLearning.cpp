@@ -21,12 +21,16 @@
 #include <algorithm>
 #include <iterator>
 
-MarginActiveLearning::MarginActiveLearning(int d)
+MarginActiveLearning::MarginActiveLearning(int d, int C, double eps, double delt)
 {
     this->dimension = d;
     this->n_label = 0;
     this->weight = new double[d];
-    this->working_set = std::vector<DataPoint>();
+    this->n_iteration = (int)ceil(log(1 / eps) / log(2.0));
+    this->C = C;
+    this->epsilon = eps;
+    this->delta = delt;
+    this->working_set = std::vector<DataPoint> ();
 };
 
 MarginActiveLearning::~MarginActiveLearning()
@@ -58,16 +62,6 @@ double MarginActiveLearning::margin(DataPoint point)
         dot_prod += this->weight[i] * point.x[i];
     }
     return fabs(dot_prod);
-};
-
-bool MarginActiveLearning::add_point(DataPoint point, double b)
-{
-    double margin = this->margin(point);
-    if (margin < b) {
-        this->working_set.push_back(point);
-        return true;
-    }
-    return false;
 };
 
 void MarginActiveLearning::update_weight()
@@ -105,30 +99,41 @@ void MarginActiveLearning::update_weight()
     destroy_param(param);
 };
 
-void MarginActiveLearning::build_model_separable(std::vector<DataPoint> data_vec, double epsilon, double delta, int C)
+/**
+ * This function will perform one more iteration of training
+ */
+void MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &data_vec)
 {
-    srand(time(NULL));
-    int n = data_vec.size();
-    int n_iteration = (int)ceil(log(1 / epsilon) / log(2.0));
-    for (int k = 1; k <= n_iteration; k++) {
-        this->update_weight();
-        
-        double d = (double) this->dimension;
-        int m = (int)(C * sqrt(d) * (d * log(d) + log(k / delta)));
-        double b = M_PI / pow(2.0, k-1);
+    if(this->k >= n_iteration)
+        return;
+    double d = (double) this->dimension;
+    int m = (int)(C * sqrt(d) * (d * log(d) + log(this->k / this->delta)));
+    double b = M_PI / pow(2.0, this->k - 1);
+    this->working_set = std::vector<DataPoint>();
 
-		int n_labeled = 0;
-        std::random_shuffle(data_vec.begin(), data_vec.end());
-		int j = 0;
-        while(1) {
-			if(n_labeled > m)
-				break;
-			if (this->add_point(data_vec[j], b))
-				n_labeled++;
-			if (j == data_vec.size() )
-				j = 0;
-			else
-				j++;
+    for(int i = 0; i < data_vec.size(); i++) {
+        /**
+         * Try to add a DataPoint point. If the margin of point is less than b,
+         * then include the point into working_sets and ask for a label. Otherwise,
+         * drop the data point
+        */
+        if(this->margin(data_vec[i]) < b) {
+            this->working_set.push_back(data_vec[i]);
         }
+        if(this->working_set.size() > m)
+            break;
+    }
+    this->k += 1;
+    update_weight();
+}
+
+/**
+ * This function will train a complete model in one time
+ */
+void MarginActiveLearning::build_model_separable(std::vector<DataPoint> &data_vec)
+{
+    while(this->k < n_iteration) {
+        std::random_shuffle(data_vec.begin(), data_vec.end());
+        this->build_model_separable_iter(data_vec);
     }
 }

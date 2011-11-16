@@ -14,14 +14,21 @@
 #include "../DataPoint.h"
 
 class MarginActiveLearning {
-public:
+private:
     int dimension;
+    int C;
     int n_label;
     double* weight;
+    int n_iteration, k;
+    double epsilon, delta;
     std::vector<DataPoint> working_set;
     
+    void update_weight(); //train on current working set to update weight
+    
+
+public:
     //constructor
-    MarginActiveLearning(int d);
+    MarginActiveLearning(int d, int C, double eps, double delt);
     ~MarginActiveLearning();
     
     //methods
@@ -29,18 +36,10 @@ public:
     double margin(DataPoint point); //compute the margin of current datapoint
     
     /**
-     * Try to add a DataPoint point. If the margin of point is less than b,
-     * then include the point into working_sets and ask for a label. Otherwise,
-     * drop the data point
-     */
-    bool add_point(DataPoint point, double b);
-    
-    void update_weight(); //train on current working set to update weight
-    
-    /**
      * train the model in separable scenario
      */
-    void build_model_separable(std::vector<DataPoint> data_vec, double epsilon, double delta, int C);
+    void build_model_separable_iter(std::vector<DataPoint> &data_vec);
+    void build_model_separable(std::vector<DataPoint> &data_vec);
     
 };
 
