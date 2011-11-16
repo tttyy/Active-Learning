@@ -55,6 +55,7 @@ int Qbc::judge(double d, int x, int y)
 		return 1;
 	else if(r < 0)
 		return -1;
+	return -1;
 }
 
 void Qbc::updateVP(double dg)

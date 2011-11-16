@@ -13,7 +13,7 @@ public:
 
 	bool read(double [], int);
 
-	static int computeL(int d, double delta, double epsilon);
-	static int computeR(int d, double delta, double epsilon);
+	static int computeL(int d, double delta, double epsilon, double c);
+	static int computeR(int d, double delta, double epsilon, double c);
 };
 

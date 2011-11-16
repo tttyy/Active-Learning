@@ -7,6 +7,9 @@
  *
  */
 
+
+#define _USE_MATH_DEFINES
+
 #include "MarginActiveLearning.h"
 #include "../DataPoint.h"
 #include "linear.h"
@@ -17,8 +20,6 @@
 #include <ctime>
 #include <algorithm>
 #include <iterator>
-
-#define _USE_MATH_DEFINES
 
 MarginActiveLearning::MarginActiveLearning(int d)
 {
@@ -108,28 +109,26 @@ void MarginActiveLearning::build_model_separable(std::vector<DataPoint> data_vec
 {
     srand(time(NULL));
     int n = data_vec.size();
-    int n_iteration = round(log(1 / epsilon) / log(2.0) + 0.5);
+    int n_iteration = (int)ceil(log(1 / epsilon) / log(2.0));
     for (int k = 1; k <= n_iteration; k++) {
         this->update_weight();
         
         double d = (double) this->dimension;
-        int m = C * sqrt(d) * (d * log(d) + log(k / delta));
+        int m = (int)(C * sqrt(d) * (d * log(d) + log(k / delta)));
         double b = M_PI / pow(2.0, k-1);
 
-	int n_labeled = 0;
+		int n_labeled = 0;
         std::random_shuffle(data_vec.begin(), data_vec.end());
-	int j = 0;
+		int j = 0;
         while(1) {
-	    if(n_labeled > m)
-		    break;
-            if (this->add_point(data_vec[j], b))
-		    n_labeled++;
-	    if (j == data_vec.size() )
-		    j = 0;
-	    else
-		    j++;
-	    
+			if(n_labeled > m)
+				break;
+			if (this->add_point(data_vec[j], b))
+				n_labeled++;
+			if (j == data_vec.size() )
+				j = 0;
+			else
+				j++;
         }
-        
     }
 }

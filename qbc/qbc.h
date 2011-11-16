@@ -1,7 +1,7 @@
 #ifndef qbc_h
 #define qbc_h
 
-#include "Tokenizer.h"
+#include "../Tokenizer.h"
 #include <cstdio>
 #include <string>
 #include <time.h> 

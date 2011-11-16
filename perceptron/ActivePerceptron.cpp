@@ -60,12 +60,12 @@ bool ActivePerceptron::read(double x[], int y) {
 	}
 }
 
-int ActivePerceptron::computeL(int d, double delta, double epsilon)
+int ActivePerceptron::computeL(int d, double delta, double epsilon, double c)
 {
-	return (double)d*log(1/delta/epsilon)*(log((double)d/delta)+log(log(1/epsilon)));
+	return c*(double)d*log(1/delta/epsilon)*(log((double)d/delta)+log(log(1/epsilon)));
 }
 
-int ActivePerceptron::computeR(int d, double delta, double epsilon)
+int ActivePerceptron::computeR(int d, double delta, double epsilon, double c)
 {
-	return log((double)d/delta)+log(log(1/epsilon));
+	return c*log((double)d/delta)+log(log(1/epsilon));
 }

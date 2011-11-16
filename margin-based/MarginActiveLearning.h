@@ -11,7 +11,7 @@
 #define MARGIN_ACTIVE_LEARNING_H
 
 #include <vector>
-#include "DataPoint.h"
+#include "../DataPoint.h"
 
 class MarginActiveLearning {
 public:
