@@ -106,14 +106,23 @@ void MarginActiveLearning::update_weight()
 	*/
 
 	Perceptron *perc = new Perceptron(dimension, this->working_set.size());
-	for (int i=0;i<this->working_set.size();i++)
-	{
-		perc->read(this->working_set[i].x, this->working_set[i].label);
-	}
-	for (int i = 0; i < dimension; i++) {
-		this->weight[i] = perc->getWeight()[i];
+    bool converged = false;
+    while(converged == false) {
+	    for (int i=0;i<this->working_set.size();i++)
+	    {
+		    perc->read(this->working_set[i].x, this->working_set[i].label);
+	    }
+	    for (int i = 0; i < dimension; i++) {
+		    this->weight[i] = perc->getWeight()[i];
+        }
+	    normalize(this->weight, dimension);
+        converged = true;
+        for (int i = 0; i < this->working_set.size(); i++)
+        {
+            if(this->classify(working_set[i]) != this->working_set[i].label)
+                converged = false;
+        }
     }
-	normalize(this->weight, dimension);
 };
 
 /**
