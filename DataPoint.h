@@ -10,8 +10,7 @@
 #ifndef DATA_POINT_H
 #define DATA_POINT_H
 
-class DataPoint {
-public:
+struct DataPoint {
     int dimension;
     double* x;
     int label;
@@ -20,5 +19,7 @@ public:
     ~DataPoint();
     DataPoint clone();
 };
+
+typedef struct DataPoint DataPoint;
 
 #endif

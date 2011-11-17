@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 	char* test_set = "src/data/test.txt";
 	string str;
 	int train_cnt = 0;
-	vector<DataPoint> *trainVec = new vector<DataPoint>();
+	vector<DataPoint> trainVec;
 
 	ifstream input;
 	input.open(train_set);
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 			}
 			normalize(x,DIM);
 			DataPoint dp(DIM, x, classify(x, DIM));
-			trainVec->push_back(dp);
+			trainVec.push_back(dp.clone());
 			train_cnt ++;
 		}
 	}
@@ -77,6 +77,8 @@ int main(int argc, char** argv)
 	ofstream fs;
 	fs.open("out.csv");
 
+	cout << "Input Done" << endl;
+
 	// Perceptron
 	Perceptron *perc = new Perceptron(DIM,L);
 	fs << "Perceptron\n";
@@ -85,9 +87,9 @@ int main(int argc, char** argv)
 	cnt=0;
 	for (int i=0;i<L;i++)
 	{
-		if (cnt >= trainVec->size())
+		if (cnt >= trainVec.size())
 			break;
-		DataPoint dp = trainVec->at(cnt++);
+		DataPoint dp = trainVec[cnt++];
 		x = dp.x;
 		perc->read(x,classify(x,DIM));
 		if ((i+1)%(int)(L/BLOCK)==0 || i==L-1)
@@ -113,6 +115,7 @@ int main(int argc, char** argv)
 			fs << i+1 << "," << (double)cor/TESTBLOCKSIZE << endl;
 		}
 	}
+	cout << "Perceptron Done!" << endl;
 
 	//ActivePerceptron
 	ActivePerceptron *perca = new ActivePerceptron(DIM, L, R);
@@ -125,14 +128,14 @@ int main(int argc, char** argv)
 	{
 		do
 		{
-			if (cnt >= trainVec->size())
+			if (cnt >= trainVec.size())
 				break;
-			DataPoint dp = trainVec->at(cnt++);
+			DataPoint dp = trainVec[cnt++];
 			x = dp.x;
 			perca->read(x,classify(x,DIM));
 		}while(i+1!=perca->getNumberOfLabel());
 
-		if (cnt >= trainVec->size())
+		if (cnt >= trainVec.size())
 			break;
 		if ((i+1)%(int)(L/BLOCK)==0 || i==L-1)
 		{
@@ -157,15 +160,16 @@ int main(int argc, char** argv)
 			fs << i+1 << "," << (double)cor/TESTBLOCKSIZE << endl;
 		}
 	}
+	cout << "Active Perceptron Done!" << endl;
 
 	// Marginal
-	/*MarginActiveLearning *margin = new MarginActiveLearning(DIM, 1, EPS, DEL);
+	MarginActiveLearning *margin = new MarginActiveLearning(DIM, 1, EPS, DEL);
 
 	input.seekg(0);
 	fs << "\nMarginActiveLearning\n";
 	fs << "m,Acc\n";
 
-	while (margin->build_model_separable_iter(*trainVec))
+	while (margin->build_model_separable_iter(trainVec))
 	{
 		cor=0;
 		for (int j=0;j<TESTBLOCKSIZE;j++)
@@ -183,10 +187,12 @@ int main(int argc, char** argv)
 				index++;
 			}
 
-			if (margin->classify(DataPoint(DIM, x,classify(x,DIM)))) cor++;
+			if (margin->classify(DataPoint(DIM, x,classify(x,DIM)))==classify(x,DIM)) cor++;
 		}
 		fs << margin->getNumberOfLabel() << "," << (double)cor/TESTBLOCKSIZE << endl;
-	}*/
+	}
+
+	cout << "Margin Done!" << endl;
 
 	fs.close();
 	input.close();

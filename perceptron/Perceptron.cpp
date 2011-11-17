@@ -58,3 +58,8 @@ void Perceptron::setL(int in)
 {
 	this->L = in;
 }
+
+double * Perceptron::getWeight()
+{
+	return v;
+}

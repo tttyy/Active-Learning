@@ -12,6 +12,8 @@
 
 #include "MarginActiveLearning.h"
 #include "../DataPoint.h"
+#include "../perceptron/Perceptron.h"
+#include "../helpers.h"
 #include "linear.h"
 #include <vector>
 #include <cstdio>
@@ -26,11 +28,14 @@ MarginActiveLearning::MarginActiveLearning(int d, int C, double eps, double delt
     this->dimension = d;
     this->n_label = 0;
     this->weight = new double[d];
+	for (int i=0;i<d;i++)
+		this->weight[i] = 1/sqrt((double)d);
     this->n_iteration = (int)ceil(log(1 / eps) / log(2.0));
     this->C = C;
     this->epsilon = eps;
     this->delta = delt;
     this->working_set = std::vector<DataPoint> ();
+	this->k = 1;
 };
 
 MarginActiveLearning::~MarginActiveLearning()
@@ -66,6 +71,7 @@ double MarginActiveLearning::margin(DataPoint point)
 
 void MarginActiveLearning::update_weight()
 {
+	/*
     struct problem prob;
     prob.l = this->working_set.size();
     prob.y = Malloc(int, prob.l);
@@ -97,6 +103,17 @@ void MarginActiveLearning::update_weight()
     }
     free_model_content(model);
     destroy_param(param);
+	*/
+
+	Perceptron *perc = new Perceptron(dimension, this->working_set.size());
+	for (int i=0;i<this->working_set.size();i++)
+	{
+		perc->read(this->working_set[i].x, this->working_set[i].label);
+	}
+	for (int i = 0; i < dimension; i++) {
+		this->weight[i] = perc->getWeight()[i];
+    }
+	normalize(this->weight, dimension);
 };
 
 /**
@@ -106,7 +123,10 @@ bool MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
 {
     if(this->k >= n_iteration)
         return false;
-	std::random_shuffle(data_vec.begin(), data_vec.end());
+	std::vector<int> indexVec;
+	for (int i=0;i<data_vec.size();i++)
+		indexVec.push_back(i);
+	std::random_shuffle(indexVec.begin(), indexVec.end());
 
     double d = (double) this->dimension;
     int m = (int)(C * sqrt(d) * (d * log(d) + log(this->k / this->delta)));
@@ -119,9 +139,11 @@ bool MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
          * then include the point into working_sets and ask for a label. Otherwise,
          * drop the data point
         */
-        if(this->margin(data_vec[i]) < b) {
-            this->working_set.push_back(data_vec[i]);
-            n_labeled++;
+		DataPoint dp = data_vec[indexVec[i]];
+        if(this->margin(dp) < b) {
+            this->working_set.push_back(dp);
+			n_labeled ++;
+            n_label++;
         }
         if(n_labeled > m)
             break;

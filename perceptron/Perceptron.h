@@ -23,6 +23,7 @@ public:
 	bool read(double [], int);
 	bool predict(double [], int);
 	void setL(int in);
+	double * getWeight();
 };
 
 #endif /* PERCEPTRON_H_ */
