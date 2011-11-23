@@ -23,6 +23,7 @@ public:
 	bool read(double [], int);
 	bool predict(double [], int);
 	void setL(int in);
+    void setT(int t);
 	double * getWeight();
 };
 

@@ -59,6 +59,11 @@ void Perceptron::setL(int in)
 	this->L = in;
 }
 
+void Perceptron::setT(int t)
+{
+    this->t = t;
+}
+
 double * Perceptron::getWeight()
 {
 	return v;

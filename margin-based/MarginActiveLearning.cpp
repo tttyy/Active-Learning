@@ -14,7 +14,6 @@
 #include "../DataPoint.h"
 #include "../perceptron/Perceptron.h"
 #include "../helpers.h"
-#include "linear.h"
 #include <vector>
 #include <cstdio>
 #include <cmath>
