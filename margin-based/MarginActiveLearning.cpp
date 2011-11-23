@@ -118,8 +118,10 @@ void MarginActiveLearning::update_weight()
         converged = true;
         for (int i = 0; i < this->working_set.size(); i++)
         {
-            if(this->classify(working_set[i]) != this->working_set[i].label)
+            if(converged && this->classify(working_set[i]) != this->working_set[i].label) {
                 converged = false;
+                perc->setT(0);
+            }
         }
     }
 };
