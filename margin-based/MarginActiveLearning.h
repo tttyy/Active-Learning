@@ -23,7 +23,9 @@ private:
     double epsilon, delta;
     std::vector<DataPoint> working_set;
     
-    void update_weight(); //train on current working set to update weight
+    void update_weight(bool separable); //train on current working set to update weight
+     //In the case of unseparable, train on current working set to find an approximate
+     //optimal solution of weight
     
 
 public:
@@ -40,6 +42,8 @@ public:
      */
     bool build_model_separable_iter(std::vector<DataPoint> &data_vec);
     void build_model_separable(std::vector<DataPoint> &data_vec);
+    bool build_model_unseparable_iter(std::vector<DataPoint> &data_vec, double, double);
+    void build_model_unseparable(std::vector<DataPoint> &data_vec, double, double);
     int getNumberOfLabel();
 };
 

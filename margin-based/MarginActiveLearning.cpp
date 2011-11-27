@@ -29,7 +29,6 @@ MarginActiveLearning::MarginActiveLearning(int d, int C, double eps, double delt
     this->weight = new double[d];
 	for (int i=0;i<d;i++)
 		this->weight[i] = 1/sqrt((double)d);
-    this->n_iteration = (int)ceil(log(1 / eps) / log(2.0));
     this->C = C;
     this->epsilon = eps;
     this->delta = delt;
@@ -68,41 +67,8 @@ double MarginActiveLearning::margin(DataPoint point)
     return fabs(dot_prod);
 };
 
-void MarginActiveLearning::update_weight()
+void MarginActiveLearning::update_weight(bool separable)
 {
-	/*
-    struct problem prob;
-    prob.l = this->working_set.size();
-    prob.y = Malloc(int, prob.l);
-    prob.x = Malloc(struct feature_node*, prob.l);
-    feature_node* x_space = Malloc(struct feature_node, prob.l * (dimension+1) );
-    
-    int j = 0;
-    for (int i = 0; i < prob.l; i++) {
-        prob.x[i] = &x_space[j];
-        prob.y[i] = this->working_set[i].label;
-        for (int k = 0; k < dimension; k++) {
-            x_space[j].index = k;
-            x_space[j].value = this->working_set[i].x[k];
-        }
-        x_space[dimension].index = -1;
-    }
-    
-    // default values
-    struct parameter *param = Malloc(struct parameter, 1);
-    param->solver_type = L2R_L2LOSS_SVC_DUAL;
-    param->C = 1;
-    param->nr_weight = 0;
-    param->weight = NULL;
-    param->weight_label = NULL;
-    
-    struct model *model = train(&prob, param);
-    for (int i = 0; i < dimension; i++) {
-        this->weight[i] = model->w[i];
-    }
-    free_model_content(model);
-    destroy_param(param);
-	*/
 
 	Perceptron *perc = new Perceptron(dimension, this->working_set.size());
     bool converged = false;
@@ -116,11 +82,13 @@ void MarginActiveLearning::update_weight()
         }
 	    normalize(this->weight, dimension);
         converged = true;
-        for (int i = 0; i < this->working_set.size(); i++)
-        {
-            if(converged && this->classify(working_set[i]) != this->working_set[i].label) {
-                converged = false;
-                perc->setT(0);
+        if (separable) {
+            for (int i = 0; i < this->working_set.size(); i++)
+            {
+                if(converged && this->classify(working_set[i]) != this->working_set[i].label) {
+                    converged = false;
+                    perc->setT(0);
+                }
             }
         }
     }
@@ -159,7 +127,7 @@ bool MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
             break;
     }
     this->k += 1;
-    update_weight();
+    update_weight(true);
 
 	return true;
 }
@@ -169,6 +137,7 @@ bool MarginActiveLearning::build_model_separable_iter(std::vector<DataPoint> &da
  */
 void MarginActiveLearning::build_model_separable(std::vector<DataPoint> &data_vec)
 {
+    this->n_iteration = (int)ceil(log(1 / epsilon) / log(2.0));
     while(this->k < n_iteration) {
         this->build_model_separable_iter(data_vec);
     }
@@ -177,4 +146,55 @@ void MarginActiveLearning::build_model_separable(std::vector<DataPoint> &data_ve
 int MarginActiveLearning::getNumberOfLabel()
 {
 	return n_label;
+}
+
+/**
+ * This function will perform one more iteration of training
+ */
+bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &data_vec, double alpha, double beta)
+{
+    if(this->k >= n_iteration)
+        return false;
+	std::vector<int> indexVec;
+	for (int i=0;i<data_vec.size();i++)
+		indexVec.push_back(i);
+	std::random_shuffle(indexVec.begin(), indexVec.end());
+    
+    double d = (double) this->dimension;
+    double b = pow(2.0, (alpha - 1) * k) * M_PI * pow(d, -0.5) * sqrt(5+alpha * k * log(beta) + log(2.0 + k));
+    double e = pow(2.0, alpha * (1 - k) - 4) * beta / sqrt(5 + alpha * k * log(2.0) - log(beta) + log(1.0 + k));
+    double m = C * pow(e, -2.0) * (d + log(k / delta));
+    
+    int n_labeled = 0;
+    for(int i = 0; i < data_vec.size(); i++) {
+        /**
+         * Try to add a DataPoint point. If the margin of point is less than b,
+         * then include the point into working_sets and ask for a label. Otherwise,
+         * include the point into working_set with automatic label.
+         */
+		DataPoint dp = data_vec[indexVec[i]];
+        if(this->margin(dp) < b) {
+            this->working_set.push_back(dp);
+			n_labeled ++;
+            n_label++;
+        } else {
+            dp.label = this->classify(dp);
+            this->working_set.push_back(dp);
+        }
+
+        if(n_labeled > m)
+            break;
+    }
+    this->k += 1;
+    update_weight(false);
+    this->working_set.clear();
+	return true;
+}
+
+void MarginActiveLearning::build_model_unseparable(std::vector<DataPoint> &data_vec, double alpha, double beta)
+{
+    this->n_iteration = (int)ceil(log(beta / this->epsilon) / log(2.0));
+    while(this->k < n_iteration) {
+        this->build_model_unseparable_iter(data_vec, alpha, beta);
+    }
 }
