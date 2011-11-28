@@ -80,7 +80,8 @@ bool Perceptron::read(DataPoint dp) {
 }
 
 bool Perceptron::predict(DataPoint dp) {
-	return dotProduct(dp,v)*dp.label>=0;
+	double p = dotProduct(dp,v);
+	return (p>=0 && dp.label==1)||(p<0 && dp.label == -1);
 }
 
 void Perceptron::setL(int in)
