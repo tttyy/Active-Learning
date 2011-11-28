@@ -8,6 +8,7 @@
 #include "Perceptron.h"
 #include <math.h>
 #include <stdio.h>
+#include "../helpers.h"
 
 Perceptron::Perceptron() {}
 
@@ -25,23 +26,51 @@ Perceptron::~Perceptron() {
 	delete(v);
 }
 
-double Perceptron::dotProduct(double a[], double b[], int n)
+double Perceptron::dotProduct(DataPoint dp, double b[])
 {
 	double sum = 0;
-	for (int i=0;i<n;i++)
-		sum += a[i]*b[i];
+	if (!dp.useMap)
+	{
+		for (int i=0;i<dp.dimension;i++)
+			sum += dp.x[i]*b[i];
+	}
+	else
+	{
+		map<const int, double>::iterator iter = dp.xMap.begin();
+		while (iter != dp.xMap.end())
+		{
+			sum += iter->second * b[iter->first-1];
+			iter++;
+		}
+	}
+	
 	return sum;
 }
 
-bool Perceptron::read(double x[], int y) {
+bool Perceptron::read(DataPoint dp) {
 	t++;
-
-	double p = dotProduct(x,v,d);
-	if ((p>=0 && y<0) || (p<0 && y>0))
+	DataPoint dp2(dp);
+	normalize(dp2);
+	double p = dotProduct(dp2,v);
+	if ((p>=0 && dp2.label<0) || (p<0 && dp2.label>0))
 	{
 		if (t<=L)
-			for (int i=0;i<d;i++)
-				v[i]+=y*x[i];
+		{
+			if (!dp2.useMap)
+			{
+				for (int i=0;i<d;i++)
+					v[i]+=dp2.label*dp2.x[i];
+			}
+			else
+			{
+				map<const int, double>::iterator iter = dp.xMap.begin();
+				while (iter != dp.xMap.end())
+				{
+					v[iter->first-1]+=dp2.label*iter->second;
+					iter++;
+				}
+			}
+		}
 		return false;
 	}
 	else
@@ -50,8 +79,8 @@ bool Perceptron::read(double x[], int y) {
 	}
 }
 
-bool Perceptron::predict(double x[], int y) {
-	return dotProduct(x,v,d)*y>=0;
+bool Perceptron::predict(DataPoint dp) {
+	return dotProduct(dp,v)*dp.label>=0;
 }
 
 void Perceptron::setL(int in)

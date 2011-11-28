@@ -1,6 +1,7 @@
 #include "ActivePerceptron.h"
 #include <math.h>
 #include <stdio.h>
+#include "../helpers.h"
 
 ActivePerceptron::ActivePerceptron(int dim, int label, int pat)
 {
@@ -9,6 +10,7 @@ ActivePerceptron::ActivePerceptron(int dim, int label, int pat)
 	R = pat;
 	s = 0;
 	v = new double[d];
+	for (int i=0;i<d;i++) v[i]=0;
 	t = 0;
 	con = 0;	// Number of consistently correct labels
 	num = 0;	// Number of requested labels
@@ -19,12 +21,18 @@ ActivePerceptron::~ActivePerceptron(void)
 {
 }
 
-bool ActivePerceptron::read(double x[], int y) {
+bool ActivePerceptron::read(DataPoint dp) {
+	DataPoint dp2(dp);
+	normalize(dp2);
 	t++;
 	double p;
 	if (t==1)
 	{
-		for (int i=0;i<d;i++) v[i]=x[i]*y;
+		if (!dp2.useMap)
+			for (int i=0;i<d;i++) v[i]=dp2.x[i]*dp2.label;
+		else
+			for (map<const int, double>::iterator iter=dp2.xMap.begin();iter!=dp2.xMap.end();iter++)
+				v[iter->first-1] = iter->second*dp.label;
 		s = 1/ sqrt((double)d);
 		con ++;
 		num++;
@@ -32,15 +40,19 @@ bool ActivePerceptron::read(double x[], int y) {
 	}
 	else
 	{
-		p = dotProduct(x,v,d);
+		p = dotProduct(dp2,v);
 		if (num<L && abs(p)<=s)
 		{
 			num++;
-			if (p * y < 0)
+			if (p * dp2.label < 0)
 			{
 				con = 0;
-				for (int i=0;i<d;i++)
-					v[i]-=2*p*x[i];
+				if (!dp2.useMap)
+					for (int i=0;i<d;i++)
+						v[i]-=2*p*dp2.x[i];
+				else
+					for (map<const int, double>::iterator iter=dp2.xMap.begin();iter!=dp2.xMap.end();iter++)
+						v[iter->first-1] -= 2*p*iter->second;
 				return false;
 			}
 			else
@@ -56,7 +68,7 @@ bool ActivePerceptron::read(double x[], int y) {
 		}
 		else
 		{
-			return predict(x, y);
+			return predict(dp2);
 		}
 	}
 }

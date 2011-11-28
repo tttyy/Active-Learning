@@ -11,7 +11,7 @@ public:
 	ActivePerceptron(int dim, int label, int pat);
 	~ActivePerceptron(void);
 
-	bool read(double [], int);
+	bool read(DataPoint dp);
 	int getNumberOfLabel();
 
 	static int computeL(int d, double delta, double epsilon, double c);

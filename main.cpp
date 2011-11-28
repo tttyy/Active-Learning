@@ -14,7 +14,8 @@
 
 using namespace std;
 
-#define DIM 10
+#define PLAIN_DATA 0
+
 #define MAXPOINT 1000
 #define EPS 0.03
 #define DEL 0.03
@@ -24,8 +25,15 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	// 1. Input
-	char* train_set = "src/data/train.txt";
-	char* test_set = "src/data/test.txt";
+#if PLAIN_DATA
+	char* train_set = "src/data/two-normal.txt";
+	char* test_set = "src/data/two-normal-test.txt";
+	int DIM = 5;
+#else
+	char* train_set = "src/data/20news/comp-rec/train-freq.txt";
+	char* test_set = "src/data/20news/comp-rec/test-freq.txt";
+	int DIM = 61188;
+#endif
 	string str;
 	int train_cnt = 0;
 	vector<DataPoint> trainVec;
@@ -39,23 +47,9 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		Tokenizer nizer;
-		while(input.good())
+		while(input >> str)
 		{
-			input >> str;
-			nizer.set(str);
-			nizer.setDelimiter(",");
-			int i=0;
-			double x[DIM];
-			string tmp;
-			while ((tmp=nizer.next())!="")
-			{
-				x[i]=atoi(tmp.c_str());
-				i++;
-			}
-			normalize(x,DIM);
-			DataPoint dp(DIM, x, classify(x, DIM));
-			trainVec.push_back(dp.clone());
+			trainVec.push_back(readData(str,DIM,!PLAIN_DATA).clone());
 			train_cnt ++;
 		}
 	}
@@ -66,13 +60,6 @@ int main(int argc, char** argv)
 	int cnt = 0;
 	double *x;
 	int cor = 0;
-
-	input.open(test_set);
-	if(!input)
-	{	
-		cout << "Unable to open " << test_set << endl;
-        exit(1); // terminate with error
-	}
 	
 	ofstream fs;
 	fs.open("out.csv");
@@ -90,29 +77,25 @@ int main(int argc, char** argv)
 		if (cnt >= trainVec.size())
 			break;
 		DataPoint dp = trainVec[cnt++];
-		x = dp.x;
-		perc->read(x,classify(x,DIM));
+		perc->read(dp);
 		if ((i+1)%(int)(L/BLOCK)==0 || i==L-1)
 		{
-			cor=0;
-			for (int j=0;j<TESTBLOCKSIZE;j++)
-			{
-				Tokenizer nizer;
-				input >> str;
-				nizer.set(str);
-				nizer.setDelimiter(",");
-				int index=0;
-				double x[DIM];
-				string tmp;
-				while ((tmp=nizer.next())!="")
-				{
-					x[index]=atoi(tmp.c_str());
-					index++;
-				}
-				normalize(x,DIM);
-				if (perc->predict(x,classify(x,DIM))) cor++;
+			cor=0;		
+			int j=0;
+			input.open(test_set);
+			if(!input)
+			{	
+				cout << "Unable to open " << test_set << endl;
+				exit(1); // terminate with error
 			}
-			fs << i+1 << "," << (double)cor/TESTBLOCKSIZE << endl;
+			while (input >> str)
+			{
+				DataPoint dpTest = readData(str,DIM,!PLAIN_DATA);
+				if (perc->predict(dpTest)) cor++;
+				j++;
+			}
+			input.close();
+			fs << i+1 << "," << (double)cor/j << endl;
 		}
 	}
 	cout << "Perceptron Done!" << endl;
@@ -131,8 +114,7 @@ int main(int argc, char** argv)
 			if (cnt >= trainVec.size())
 				break;
 			DataPoint dp = trainVec[cnt++];
-			x = dp.x;
-			perca->read(x,classify(x,DIM));
+			perca->read(dp);
 		}while(i+1!=perca->getNumberOfLabel());
 
 		if (cnt >= trainVec.size())
@@ -140,29 +122,27 @@ int main(int argc, char** argv)
 		if ((i+1)%(int)(L/BLOCK)==0 || i==L-1)
 		{
 			cor=0;
-			for (int j=0;j<TESTBLOCKSIZE;j++)
-			{
-				Tokenizer nizer;
-				input >> str;
-				nizer.set(str);
-				nizer.setDelimiter(",");
-				int index=0;
-				double x[DIM];
-				string tmp;
-				while ((tmp=nizer.next())!="")
-				{
-					x[index]=atoi(tmp.c_str());
-					index++;
-				}
-				normalize(x,DIM);
-				if (perca->predict(x,classify(x,DIM))) cor++;
+			input.open(test_set);
+			if(!input)
+			{	
+				cout << "Unable to open " << test_set << endl;
+				exit(1); // terminate with error
 			}
-			fs << i+1 << "," << (double)cor/TESTBLOCKSIZE << endl;
+			int j=0;
+			while (input >> str)
+			{
+				DataPoint dpTest = readData(str,DIM,!PLAIN_DATA);
+				if (perca->predict(dpTest)) cor++;
+				j++;
+			}
+			input.close();
+			fs << i+1 << "," << (double)cor/j << endl;
 		}
 	}
 	cout << "Active Perceptron Done!" << endl;
 
 	// Marginal
+	/*
 	MarginActiveLearning *margin = new MarginActiveLearning(DIM, 1, EPS, DEL);
 
 	input.seekg(0);
@@ -172,29 +152,26 @@ int main(int argc, char** argv)
 	while (margin->build_model_separable_iter(trainVec))
 	{
 		cor=0;
-		for (int j=0;j<TESTBLOCKSIZE;j++)
-		{
-			Tokenizer nizer;
-			input >> str;
-			nizer.set(str);
-			nizer.setDelimiter(",");
-			int index=0;
-			double x[DIM];
-			string tmp;
-			while ((tmp=nizer.next())!="")
-			{
-				x[index]=atoi(tmp.c_str());
-				index++;
-			}
-
-			if (margin->classify(DataPoint(DIM, x,classify(x,DIM)))==classify(x,DIM)) cor++;
+		input.open(test_set);
+		if(!input)
+		{	
+			cout << "Unable to open " << test_set << endl;
+			exit(1); // terminate with error
 		}
-		fs << margin->getNumberOfLabel() << "," << (double)cor/TESTBLOCKSIZE << endl;
+		int j=0;
+		while (input >> str)
+		{
+			DataPoint dpTest = readData(str,DIM,!PLAIN_DATA);
+			if (margin->classify(dpTest)==dpTest.label) cor++;
+			j++;
+		}
+		input.close();
+		fs << margin->getNumberOfLabel() << "," << (double)cor/j << endl;
 	}
 
 	cout << "Margin Done!" << endl;
+	*/
 
 	fs.close();
-	input.close();
 	return 0;
 }

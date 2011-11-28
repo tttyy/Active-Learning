@@ -1,6 +1,7 @@
 #include "helpers.h"
 #include "stdlib.h"
 #include "math.h"
+#include "Tokenizer.h"
 
 // Generate an d-dimensional array of random numbers between -0.5 and 0.5
 // Assuming that the seed is setup elsewhere
@@ -27,7 +28,7 @@ int classify(double x[], int d)
 		return -1;
 }
 
-void normalize(double *x, int d)
+void normalize(double x[], int d)
 {
 	double sum = 0;
 	for (int i=0;i<d;i++)
@@ -35,4 +36,70 @@ void normalize(double *x, int d)
 	sum = sqrt(sum);
 	for (int i=0;i<d;i++)
 		x[i]/=sum;
+}
+void normalize(DataPoint dp)
+{
+	if (!dp.useMap)
+	{
+		normalize(dp.x,dp.dimension);
+	}
+	else
+	{
+		double sum = 0;
+		map<const int, double>::iterator iter = dp.xMap.begin();
+		while (iter!= dp.xMap.end())
+		{
+			sum+=iter->second * iter->second;
+			iter++;
+		}
+		sum = sqrt(sum);
+		iter = dp.xMap.begin();
+		while (iter!= dp.xMap.end())
+		{
+			iter->second /= sum;
+			iter++;
+		}
+	}
+}
+
+DataPoint readData(string str, int d, bool isMap)
+{
+	Tokenizer nizer;
+	nizer.set(str);
+	nizer.setDelimiter(",");
+	int i=0;
+	if (!isMap)
+	{
+		double *x = new double[d+1];
+		string tmp;
+		while ((tmp=nizer.next())!="")
+		{
+			x[i]=atof(tmp.c_str());
+			i++;
+		}
+		DataPoint dp(d, x, x[d]);
+		return dp;
+	}
+	else
+	{
+		int dimen;
+		double x;
+		string tmp;
+
+		DataPoint dp(d);
+
+		while ((tmp=nizer.next())!="")
+		{
+			if (i%2 == 1)
+				x=atof(tmp.c_str());
+			else
+				dimen = atoi(tmp.c_str());
+
+			if (i%2 == 1)
+				dp.addComp(dimen,x);
+			i++;
+		}
+
+		return d;
+	}
 }

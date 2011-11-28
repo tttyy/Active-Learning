@@ -18,24 +18,48 @@ DataPoint::DataPoint(int d, double* xvec, int l)
         this->x[i] = xvec[i];
     }
     this->label = l;
+	this->useMap = false;
 };
 
 DataPoint::DataPoint(const DataPoint &dp)
 {
 	this->dimension = dp.dimension;
-	this->x = new double[dp.dimension];
-	for (int i = 0; i < dp.dimension; i++) {
-		this->x[i] = dp.x[i];
-    }
+	if (!(this->useMap = dp.useMap))
+	{
+		this->x = new double[dp.dimension];
+		for (int i = 0; i < dp.dimension; i++) {
+			this->x[i] = dp.x[i];
+		}
+	}
+	else
+	{
+		this->xMap = map<const int, double>(dp.xMap);
+	}
 	this->label = dp.label;
+	
+}
+
+DataPoint::DataPoint(int d)
+{
+	this->dimension = d;
+	this->useMap = true;
 }
 
 DataPoint::~DataPoint()
 {
+	if (!this->useMap)
     delete[] this->x;
 }
 
 DataPoint DataPoint::clone()
 {
-    return DataPoint(this->dimension, this->x, this->label);
+    return DataPoint(*this);
+}
+
+void DataPoint::addComp(int a, double b)
+{
+	if (a == -1)
+		this->label = b;
+	else
+		this->xMap[a]=b;
 }

@@ -75,7 +75,7 @@ void MarginActiveLearning::update_weight(bool separable)
     while(converged == false) {
 	    for (int i=0;i<this->working_set.size();i++)
 	    {
-		    perc->read(this->working_set[i].x, this->working_set[i].label);
+		    perc->read(this->working_set[i]);
 	    }
 	    for (int i = 0; i < dimension; i++) {
 		    this->weight[i] = perc->getWeight()[i];
