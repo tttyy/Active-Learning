@@ -63,11 +63,11 @@ def split_data_sets(pos_class_list, neg_class_list, input_folder,
             elif(labels[did - 1] in neg_class_list):
                 label = -1
             for tid, freq in freq_map.iteritems():
-                o_freq_f.write("%d %d " % (tid, freq))
+                o_freq_f.write("%d,%d " % (tid, freq))
                 idf = math.log(nd / df[tid])
-                o_tfidf_f.write("%d %f " % (tid, freq * idf))
-            o_freq_f.write("-1 %d\n" % label)
-            o_tfidf_f.write("-1 %d\n" % label)
+                o_tfidf_f.write("%d,%f " % (tid, freq * idf))
+            o_freq_f.write("-1,%d\n" % label)
+            o_tfidf_f.write("-1,%d\n" % label)
         o_freq_f.close()
         o_tfidf_f.close()
 
@@ -98,4 +98,7 @@ def get_stop_words_list(stop_word_file, vocabulary_file, exclude_id_file):
 
 
 if __name__ == '__main__':
-    split_data_sets([2,3,4,5,6], [8,9,10,11], ".", "comp-rec", "exclude-words.txt")
+    #split_data_sets([2,3,4,5,6], [8,9,10,11], ".", "comp-rec", "exclude-words.txt")
+    #split_data_sets([4], [5], ".", "pc-mac", "exclude-words.txt")
+    split_data_sets([17,18,19], [1,16,20], ".", "politic-religion",
+            "exclude-words.txt")

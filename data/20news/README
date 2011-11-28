@@ -1,0 +1,6 @@
+Data Format
+
+Each line is a data point.
+Features stored in sparse fashion.
+
+index1,value1,index2,value2,...,indexN,valueN,-1,class
