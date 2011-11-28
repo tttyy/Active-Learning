@@ -100,6 +100,6 @@ DataPoint readData(string str, int d, bool isMap)
 			i++;
 		}
 
-		return d;
+		return dp;
 	}
 }

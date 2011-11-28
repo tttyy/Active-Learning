@@ -56,6 +56,7 @@ int main(int argc, char** argv)
 	input.close();
 
 	int L=ActivePerceptron::computeL(DIM,DEL,EPS,1);
+	if (L>train_cnt) L=train_cnt;
 	int R=ActivePerceptron::computeR(DIM,DEL,EPS,1);
 	int cnt = 0;
 	double *x;
@@ -96,6 +97,7 @@ int main(int argc, char** argv)
 			}
 			input.close();
 			fs << i+1 << "," << (double)cor/j << endl;
+			cout << i+1 << "," << (double)cor/j << endl;
 		}
 	}
 	cout << "Perceptron Done!" << endl;
@@ -137,6 +139,7 @@ int main(int argc, char** argv)
 			}
 			input.close();
 			fs << i+1 << "," << (double)cor/j << endl;
+			cout << i+1 << "," << (double)cor/j << endl;
 		}
 	}
 	cout << "Active Perceptron Done!" << endl;
