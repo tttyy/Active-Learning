@@ -5,7 +5,7 @@ cnt = 0;
 res = rand(len, 10);
 res0 = rand(len, 11);
 
-res = 2000000 * res - 1000000;
+res = 20 * res - 10;
 w = [1 1 1 1 1 0 0 0 0 5];
 
 for i = 1:len
@@ -19,7 +19,7 @@ for i = 1:len
     end
 end
 
-dlmwrite('train.txt', res0, 'precision', '%.0f');
+dlmwrite('test.txt', res0, 'precision', '%.3f');
 
 disp(cnt);
 disp(len - cnt);
