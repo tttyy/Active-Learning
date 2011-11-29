@@ -18,7 +18,7 @@ for i = 1:len
     end
 end
 
-dlmwrite('train.txt', res0, 'precision', '%.0f');
+dlmwrite('test.txt', res0, 'precision', '%.0f');
 
 disp(cnt);
 disp(len - cnt);
