@@ -47,6 +47,7 @@ public:
 	void set_niter_for_unseparable(double);
 	void set_niter_for_separable();
     int getNumberOfLabel();
+	int getNumberOfIter();
 };
 
 #endif

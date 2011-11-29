@@ -14,10 +14,12 @@
 
 using namespace std;
 
-#define PLAIN_DATA 2
+#define PLAIN_DATA 1
+#define FILE_NAME "2Norm_Overall.html"
 
 #define PERCEPTRON_OPEN
 #define ACTIVE_PERCEPTRON_OPEN
+#define ACTIVE_BOND_OPEN
 #define MARGIN_OPEN
 
 #define MAXPOINT 1000
@@ -28,7 +30,10 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	// 1. Input
+// *******************
+// 1. Input
+//********************
+	int nSeries=0;
 #if PLAIN_DATA == 0
 	char* train_set = "src/data/train.txt";
 	char* test_set = "src/data/test.txt";
@@ -39,12 +44,13 @@ int main(int argc, char** argv)
 	char* test_set = "src/data/2norm/2norm.test";
 	int DIM = 10;
 #else
-	char* train_set = "src/data/20news/comp-rec/train-tfidf.txt";
-	char* test_set = "src/data/20news/comp-rec/test-tfidf.txt";
+	char* train_set = "src/data/20news/politic-religion/train-tfidf.txt";
+	char* test_set = "src/data/20news/politic-religion/test-tfidf.txt";
 	int DIM = 61188;
 #endif
 #endif
 	string str;
+	char ch;
 	int train_cnt = 0;
 	vector<DataPoint> trainVec;
 
@@ -67,23 +73,48 @@ int main(int argc, char** argv)
 	}
 	input.close();
 
+// *******************
+// 2. Output Header
+//********************
+		
+	ofstream fs;
+	fs.open(FILE_NAME);
+
+	input.open("header.html");
+	if(!input)
+	{	
+		cout << "Unable to open header.html\nJump header";
+	}
+	else
+	{
+		while(input && input.get(ch))
+		{
+			fs.put(ch);
+		}
+		input.close();
+	}
+
+
+// *******************
+// 3. Generate Series
+//********************
+
 	int L=ActivePerceptron::computeL(DIM,DEL,EPS,1);
 	if (L>train_cnt) L=train_cnt;
 	int R=ActivePerceptron::computeR(DIM,DEL,EPS,1);
 	int cnt = 0;
 	double *x;
 	int cor = 0;
-	
-	ofstream fs;
-	fs.open("out.csv");
 
 	cout << "Input Done" << endl;
+	fs << "[";
 	
 #ifdef PERCEPTRON_OPEN
 	// Perceptron
+	nSeries++;
 	Perceptron *perc = new Perceptron(DIM,L);
-	fs << "Perceptron\n";
-	fs << "m,Acc\n";
+	fs << "{\nname: 'Perceptron',\n";
+	fs << "data: [";
 
 	cnt=0;
 	for (int i=0;i<L;i++)
@@ -109,19 +140,22 @@ int main(int argc, char** argv)
 				j++;
 			}
 			input.close();
-			fs << i+1 << "," << (double)cor/j << endl;
+			fs << ((i+1<=(int)(L/BLOCK))?"":"\n,") << "[" << i+1 << "," << (double)cor/j << "]";
 			cout << i+1 << "," << (double)cor/j << endl;
 		}
 	}
 	cout << "Perceptron Done!" << endl;
+	fs << "]\n}";
 #endif
 
 #ifdef ACTIVE_PERCEPTRON_OPEN
 	//ActivePerceptron
+	if (++nSeries>1)
+		fs << ",";
 	ActivePerceptron *perca = new ActivePerceptron(DIM, L, R);
 	input.seekg(0);
-	fs << "\nActivePerceptron\n";
-	fs << "m,Acc\n";
+	fs << "{\nname: 'Active Perceptron',\n";
+	fs << "data: [";
 
 	cnt=0;
 	for (int i=0;i<L;i++)
@@ -153,25 +187,28 @@ int main(int argc, char** argv)
 				j++;
 			}
 			input.close();
-			fs << i+1 << "," << (double)cor/j << endl;
+			fs << ((i+1<=(int)(L/BLOCK))?"":"\n,") << "[" << i+1 << "," << (double)cor/j << "]";
 			cout << i+1 << "," << (double)cor/j << endl;
 		}
 	}
 	cout << "Active Perceptron Done!" << endl;
+	fs << "]\n}";
 #endif
 
 #ifdef MARGIN_OPEN
 	// Marginal
+	if (++nSeries>1)
+		fs << ",";
 	double C = 1;
 	if (PLAIN_DATA == 1)
 		C = 0.0003;
 	if (PLAIN_DATA == 2)
-		C = 0.0000006;
+		C = 0.0000003;
 	MarginActiveLearning *margin = new MarginActiveLearning(DIM, C, EPS, DEL);
 
 	input.seekg(0);
-	fs << "\nMarginActiveLearning\n";
-	fs << "m,Acc\n";
+	fs << "{\nname: 'MarginActiveLearning',\n";
+	fs << "data: [";
 #if PLAIN_DATA == 0
 	margin->set_niter_for_separable();
 	while (margin->build_model_separable_iter(trainVec))
@@ -195,12 +232,47 @@ int main(int argc, char** argv)
 			j++;
 		}
 		input.close();
-		fs << margin->getNumberOfLabel() << "," << (double)cor/j << endl;
+		fs << (margin->getNumberOfIter()==2?"":"\n,") << "[" << margin->getNumberOfLabel() << "," << (double)cor/j << "]";
 		cout << margin->getNumberOfLabel() << "," << (double)cor/j << endl;
 	}
 
 	cout << "Margin Done!" << endl;
+	fs << "]\n}";
 #endif
+
+#ifdef ACTIVE_BOND_OPEN
+	if (++nSeries>1)
+		fs << ",";
+	fs << "{\nname: 'Active Perceptron Bond',\n";
+	fs << "data: [";
+	for (double e = 0.5;e>=0.05;e-=0.05)
+	{
+		fs << ((e==0.5)?"":"\n,") << "[" << (int)ActivePerceptron::computeL(DIM,DEL,e,1) << "," << 1-e << "]";
+		cout << (int)ActivePerceptron::computeL(DIM,DEL,e,1) << "," << 1-e << endl;
+	}
+	cout << "Active Perceptron Bond Done!" << endl;
+	fs << "]\n}";
+
+#endif
+	fs << "]";
+
+// *******************
+// 4. Output Footer
+//********************
+
+	input.open("footer.html");
+	if(!input)
+	{	
+		cout << "Unable to open footer.html\nJump footer";
+	}
+	else
+	{
+		while(input && input.get(ch))
+		{
+			fs.put(ch);
+		}
+		input.close();
+	}
 
 	fs.close();
 	return 0;

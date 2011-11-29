@@ -229,3 +229,8 @@ void MarginActiveLearning::set_niter_for_separable()
 {
 	this->n_iteration = (int)ceil(log(1 / epsilon) / log(2.0));
 }
+
+int MarginActiveLearning::getNumberOfIter()
+{
+	return k;
+}
