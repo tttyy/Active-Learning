@@ -63,3 +63,12 @@ void DataPoint::addComp(int a, double b)
 	else
 		this->xMap[a]=b;
 }
+
+int DataPoint::nnz()
+{
+    if (this->useMap) {
+        return xMap.size();
+    }
+    else
+        return this->dimension;
+}

@@ -25,6 +25,7 @@ struct DataPoint {
 	void addComp(int, double);
     ~DataPoint();
     DataPoint clone();
+    int nnz();
 };
 
 typedef struct DataPoint DataPoint;
