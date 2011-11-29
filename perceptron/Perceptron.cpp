@@ -98,3 +98,9 @@ double * Perceptron::getWeight()
 {
 	return v;
 }
+
+void Perceptron::setWeight(double * weight)
+{
+	for (int i=0;i<d;i++)
+		v[i]=weight[i];
+}

@@ -14,10 +14,10 @@
 
 using namespace std;
 
-#define PLAIN_DATA 0
+#define PLAIN_DATA 2
 
-//#define PERCEPTRON_OPEN
-//#define ACTIVE_PERCEPTRON_OPEN
+#define PERCEPTRON_OPEN
+#define ACTIVE_PERCEPTRON_OPEN
 #define MARGIN_OPEN
 
 #define MAXPOINT 1000
@@ -29,7 +29,12 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	// 1. Input
-#if PLAIN_DATA
+#if PLAIN_DATA == 0
+	char* train_set = "src/data/train.txt";
+	char* test_set = "src/data/test.txt";
+	int DIM = 10;
+#else 
+#if PLAIN_DATA == 1
 	char* train_set = "src/data/2norm/2norm.train";
 	char* test_set = "src/data/2norm/2norm.test";
 	int DIM = 10;
@@ -37,6 +42,7 @@ int main(int argc, char** argv)
 	char* train_set = "src/data/20news/comp-rec/train-tfidf.txt";
 	char* test_set = "src/data/20news/comp-rec/test-tfidf.txt";
 	int DIM = 61188;
+#endif
 #endif
 	string str;
 	int train_cnt = 0;
@@ -53,7 +59,9 @@ int main(int argc, char** argv)
 	{
 		while(input >> str)
 		{
-			trainVec.push_back(readData(str,DIM,!PLAIN_DATA).clone());
+			DataPoint dp = readData(str,DIM,PLAIN_DATA==2);
+			normalize(dp);
+			trainVec.push_back(dp.clone());
 			train_cnt ++;
 		}
 	}
@@ -96,7 +104,7 @@ int main(int argc, char** argv)
 			}
 			while (input >> str)
 			{
-				DataPoint dpTest = readData(str,DIM,!PLAIN_DATA);
+				DataPoint dpTest = readData(str,DIM,PLAIN_DATA==2);
 				if (perc->predict(dpTest)) cor++;
 				j++;
 			}
@@ -140,7 +148,7 @@ int main(int argc, char** argv)
 			int j=0;
 			while (input >> str)
 			{
-				DataPoint dpTest = readData(str,DIM,!PLAIN_DATA);
+				DataPoint dpTest = readData(str,DIM,PLAIN_DATA==2);
 				if (perca->predict(dpTest)) cor++;
 				j++;
 			}
@@ -154,14 +162,23 @@ int main(int argc, char** argv)
 
 #ifdef MARGIN_OPEN
 	// Marginal
-	MarginActiveLearning *margin = new MarginActiveLearning(DIM, 0.0000002, EPS, DEL);
+	double C = 1;
+	if (PLAIN_DATA == 1)
+		C = 0.0003;
+	if (PLAIN_DATA == 2)
+		C = 0.0000006;
+	MarginActiveLearning *margin = new MarginActiveLearning(DIM, C, EPS, DEL);
 
 	input.seekg(0);
 	fs << "\nMarginActiveLearning\n";
 	fs << "m,Acc\n";
+#if PLAIN_DATA == 0
+	margin->set_niter_for_separable();
+	while (margin->build_model_separable_iter(trainVec))
+#else
 	margin->set_niter_for_unseparable(0.25);
-
 	while (margin->build_model_unseparable_iter(trainVec,0,0.25))
+#endif
 	{
 		cor=0;
 		input.open(test_set);
@@ -173,7 +190,7 @@ int main(int argc, char** argv)
 		int j=0;
 		while (input >> str)
 		{
-			DataPoint dpTest = readData(str,DIM,!PLAIN_DATA);
+			DataPoint dpTest = readData(str,DIM,PLAIN_DATA==2);
 			if (margin->classify(dpTest)==dpTest.label) cor++;
 			j++;
 		}
