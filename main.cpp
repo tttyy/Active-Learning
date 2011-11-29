@@ -16,8 +16,12 @@ using namespace std;
 
 #define PLAIN_DATA 0
 
+//#define PERCEPTRON_OPEN
+//#define ACTIVE_PERCEPTRON_OPEN
+#define MARGIN_OPEN
+
 #define MAXPOINT 1000
-#define EPS 0.03
+#define EPS 0.02
 #define DEL 0.03
 #define BLOCK 10
 #define TESTBLOCKSIZE 100
@@ -67,6 +71,7 @@ int main(int argc, char** argv)
 
 	cout << "Input Done" << endl;
 	
+#ifdef PERCEPTRON_OPEN
 	// Perceptron
 	Perceptron *perc = new Perceptron(DIM,L);
 	fs << "Perceptron\n";
@@ -101,7 +106,9 @@ int main(int argc, char** argv)
 		}
 	}
 	cout << "Perceptron Done!" << endl;
+#endif
 
+#ifdef ACTIVE_PERCEPTRON_OPEN
 	//ActivePerceptron
 	ActivePerceptron *perca = new ActivePerceptron(DIM, L, R);
 	input.seekg(0);
@@ -143,16 +150,18 @@ int main(int argc, char** argv)
 		}
 	}
 	cout << "Active Perceptron Done!" << endl;
+#endif
 
+#ifdef MARGIN_OPEN
 	// Marginal
-	/*
-	MarginActiveLearning *margin = new MarginActiveLearning(DIM, 1, EPS, DEL);
+	MarginActiveLearning *margin = new MarginActiveLearning(DIM, 0.0000002, EPS, DEL);
 
 	input.seekg(0);
 	fs << "\nMarginActiveLearning\n";
 	fs << "m,Acc\n";
+	margin->set_niter_for_unseparable(0.25);
 
-	while (margin->build_model_separable_iter(trainVec))
+	while (margin->build_model_unseparable_iter(trainVec,0,0.25))
 	{
 		cor=0;
 		input.open(test_set);
@@ -170,10 +179,11 @@ int main(int argc, char** argv)
 		}
 		input.close();
 		fs << margin->getNumberOfLabel() << "," << (double)cor/j << endl;
+		cout << margin->getNumberOfLabel() << "," << (double)cor/j << endl;
 	}
 
 	cout << "Margin Done!" << endl;
-	*/
+#endif
 
 	fs.close();
 	return 0;

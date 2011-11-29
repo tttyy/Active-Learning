@@ -16,7 +16,7 @@
 class MarginActiveLearning {
 private:
     int dimension;
-    int C;
+    double C;
     int n_label;
     double* weight;
     int n_iteration, k;
@@ -30,7 +30,7 @@ private:
 
 public:
     //constructor
-    MarginActiveLearning(int d, int C, double eps, double delt);
+    MarginActiveLearning(int d, double C, double eps, double delt);
     ~MarginActiveLearning();
     
     //methods
@@ -44,6 +44,7 @@ public:
     void build_model_separable(std::vector<DataPoint> &data_vec);
     bool build_model_unseparable_iter(std::vector<DataPoint> &data_vec, double, double);
     void build_model_unseparable(std::vector<DataPoint> &data_vec, double, double);
+	void set_niter_for_unseparable(double);
     int getNumberOfLabel();
 };
 

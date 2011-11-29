@@ -21,8 +21,9 @@
 #include <ctime>
 #include <algorithm>
 #include <iterator>
+#include <iostream>
 
-MarginActiveLearning::MarginActiveLearning(int d, int C, double eps, double delt)
+MarginActiveLearning::MarginActiveLearning(int d, double C, double eps, double delt)
 {
     this->dimension = d;
     this->n_label = 0;
@@ -48,9 +49,13 @@ int MarginActiveLearning::classify(DataPoint point)
         exit(1);
     }
     double dot_prod = 0.0;
-    for (int i = 0; i < this->dimension; i++) {
-        dot_prod += this->weight[i] * point.x[i];
-    }
+	if (!point.useMap)
+		for (int i = 0; i < this->dimension; i++) {
+			dot_prod += this->weight[i] * point.x[i];
+		}
+	else
+		for (map<const int, double>::iterator iter = point.xMap.begin();iter!=point.xMap.end();iter++)
+			dot_prod += this->weight[iter->first-1] * iter->second;
     return dot_prod >=0 ? 1 : -1;
 };
 
@@ -61,9 +66,13 @@ double MarginActiveLearning::margin(DataPoint point)
         exit(1);
     }
     double dot_prod = 0.0;
-    for (int i =0; i < this->dimension; i++) {
-        dot_prod += this->weight[i] * point.x[i];
-    }
+	if (!point.useMap)
+		for (int i =0; i < this->dimension; i++) {
+			dot_prod += this->weight[i] * point.x[i];
+		}
+	else
+		for (map<const int, double>::iterator iter = point.xMap.begin();iter!=point.xMap.end();iter++)
+			dot_prod += this->weight[iter->first-1] * iter->second;
     return fabs(dot_prod);
 };
 
@@ -153,7 +162,7 @@ int MarginActiveLearning::getNumberOfLabel()
  */
 bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &data_vec, double alpha, double beta)
 {
-    if(this->k >= n_iteration)
+    if(this->k > n_iteration)
         return false;
 	std::vector<int> indexVec;
 	for (int i=0;i<data_vec.size();i++)
@@ -164,6 +173,8 @@ bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &
     double b = pow(2.0, (alpha - 1) * k) * M_PI * pow(d, -0.5) * sqrt(5+alpha * k * log(beta) + log(2.0 + k));
     double e = pow(2.0, alpha * (1 - k) - 4) * beta / sqrt(5 + alpha * k * log(2.0) - log(beta) + log(1.0 + k));
     double m = C * pow(e, -2.0) * (d + log(k / delta));
+
+	std::cout << "k: "<< k <<",d: "<<d<<",b: "<<b<<",e: "<<e<<",m: "<< m<<endl;
     
     int n_labeled = 0;
     for(int i = 0; i < data_vec.size(); i++) {
@@ -173,7 +184,13 @@ bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &
          * include the point into working_set with automatic label.
          */
 		DataPoint dp = data_vec[indexVec[i]];
-        if(this->margin(dp) < b) {
+		if (k==1)
+		{
+			this->working_set.push_back(dp);
+			n_labeled ++;
+			n_label++;
+		}
+        else if(this->margin(dp) < b) {
             this->working_set.push_back(dp);
 			n_labeled ++;
             n_label++;
@@ -182,9 +199,9 @@ bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &
             this->working_set.push_back(dp);
         }
 
-        if(n_labeled > m)
+        if(n_labeled >= m)
             break;
-    }
+	}
     this->k += 1;
     update_weight(false);
     this->working_set.clear();
@@ -197,4 +214,9 @@ void MarginActiveLearning::build_model_unseparable(std::vector<DataPoint> &data_
     while(this->k < n_iteration) {
         this->build_model_unseparable_iter(data_vec, alpha, beta);
     }
+}
+
+void MarginActiveLearning::set_niter_for_unseparable(double beta)
+{
+	this->n_iteration = (int)ceil(log(beta / this->epsilon) / log(2.0));
 }
