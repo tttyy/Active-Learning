@@ -1,0 +1,30 @@
+function [] = generate2()
+
+len = 10000;
+cnt = 1;
+res = rand(len, 20);
+res0 = randperm(1000000);
+
+for i = 1:1000000
+    k = rand();
+    if(k < 0.015)
+        res(cnt,:) = de2bi(res0(i), 20);
+        cnt = cnt + 1;
+    end
+    if(cnt > len)
+        break;
+    end
+end
+
+pos = 0;
+
+for i = 1:10000
+    
+end
+
+dlmwrite('train_binary.txt', res, 'precision', '%.0f');
+
+disp(cnt);
+disp(len - cnt);
+
+end

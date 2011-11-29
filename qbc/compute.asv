@@ -1,0 +1,14 @@
+function [] = compute()
+
+err = zeros(100,1);
+
+for i = 1:100
+    x = (-0.67) * i;
+    x = x / 45;
+    err(i) = 48 * (2^x);
+    disp(err(i));
+end
+
+%dlmwrite('theoryerror.txt', err, 'precision', '%.4f');
+
+end
