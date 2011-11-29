@@ -33,7 +33,7 @@ bool ActivePerceptron::read(DataPoint dp) {
 		else
 			for (map<const int, double>::iterator iter=dp2.xMap.begin();iter!=dp2.xMap.end();iter++)
 				v[iter->first-1] = iter->second*dp.label;
-		s = 1/ sqrt((double)d);
+		s = 200/ sqrt((double)d);
 		con ++;
 		num++;
 		return true;
@@ -44,7 +44,7 @@ bool ActivePerceptron::read(DataPoint dp) {
 		if (num<L && abs(p)<=s)
 		{
 			num++;
-			if (p * dp2.label < 0)
+			if ((p>=0 && dp2.label<0) || (p<0 && dp2.label>0))
 			{
 				con = 0;
 				if (!dp2.useMap)

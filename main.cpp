@@ -26,12 +26,12 @@ int main(int argc, char** argv)
 {
 	// 1. Input
 #if PLAIN_DATA
-	char* train_set = "src/data/two-normal.txt";
-	char* test_set = "src/data/two-normal-test.txt";
-	int DIM = 5;
+	char* train_set = "src/data/2norm/2norm.train";
+	char* test_set = "src/data/2norm/2norm.test";
+	int DIM = 10;
 #else
-	char* train_set = "src/data/20news/comp-rec/train-freq.txt";
-	char* test_set = "src/data/20news/comp-rec/test-freq.txt";
+	char* train_set = "src/data/20news/comp-rec/train-tfidf.txt";
+	char* test_set = "src/data/20news/comp-rec/test-tfidf.txt";
 	int DIM = 61188;
 #endif
 	string str;
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 	fs.open("out.csv");
 
 	cout << "Input Done" << endl;
-
+	
 	// Perceptron
 	Perceptron *perc = new Perceptron(DIM,L);
 	fs << "Perceptron\n";

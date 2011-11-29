@@ -37,7 +37,7 @@ void normalize(double x[], int d)
 	for (int i=0;i<d;i++)
 		x[i]/=sum;
 }
-void normalize(DataPoint dp)
+void normalize(DataPoint &dp)
 {
 	if (!dp.useMap)
 	{
