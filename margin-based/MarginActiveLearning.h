@@ -45,6 +45,7 @@ public:
     bool build_model_unseparable_iter(std::vector<DataPoint> &data_vec, double, double);
     void build_model_unseparable(std::vector<DataPoint> &data_vec, double, double);
 	void set_niter_for_unseparable(double);
+	void set_niter_for_separable();
     int getNumberOfLabel();
 };
 

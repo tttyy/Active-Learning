@@ -80,6 +80,7 @@ void MarginActiveLearning::update_weight(bool separable)
 {
 
 	Perceptron *perc = new Perceptron(dimension, this->working_set.size());
+	//perc->setWeight(this->weight);
     bool converged = false;
     while(converged == false) {
 	    for (int i=0;i<this->working_set.size();i++)
@@ -165,6 +166,7 @@ bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &
     if(this->k > n_iteration)
         return false;
 	std::vector<int> indexVec;
+
 	for (int i=0;i<data_vec.size();i++)
 		indexVec.push_back(i);
 	std::random_shuffle(indexVec.begin(), indexVec.end());
@@ -177,6 +179,7 @@ bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &
 	std::cout << "k: "<< k <<",d: "<<d<<",b: "<<b<<",e: "<<e<<",m: "<< m<<endl;
     
     int n_labeled = 0;
+	
     for(int i = 0; i < data_vec.size(); i++) {
         /**
          * Try to add a DataPoint point. If the margin of point is less than b,
@@ -192,6 +195,7 @@ bool MarginActiveLearning::build_model_unseparable_iter(std::vector<DataPoint> &
 		}
         else if(this->margin(dp) < b) {
             this->working_set.push_back(dp);
+
 			n_labeled ++;
             n_label++;
         } else {
@@ -219,4 +223,9 @@ void MarginActiveLearning::build_model_unseparable(std::vector<DataPoint> &data_
 void MarginActiveLearning::set_niter_for_unseparable(double beta)
 {
 	this->n_iteration = (int)ceil(log(beta / this->epsilon) / log(2.0));
+}
+
+void MarginActiveLearning::set_niter_for_separable()
+{
+	this->n_iteration = (int)ceil(log(1 / epsilon) / log(2.0));
 }

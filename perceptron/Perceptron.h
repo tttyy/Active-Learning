@@ -27,6 +27,7 @@ public:
 	void setL(int in);
     void setT(int t);
 	double * getWeight();
+	void setWeight(double *);
 };
 
 #endif /* PERCEPTRON_H_ */
