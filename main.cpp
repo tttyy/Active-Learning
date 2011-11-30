@@ -14,13 +14,13 @@
 
 using namespace std;
 
-#define PLAIN_DATA 1
-#define FILE_NAME "2Norm_Overall.html"
+#define PLAIN_DATA 2
+#define FILE_NAME "temp.html"
 
-#define PERCEPTRON_OPEN
+//#define PERCEPTRON_OPEN
 #define ACTIVE_PERCEPTRON_OPEN
-#define ACTIVE_BOND_OPEN
-#define MARGIN_OPEN
+//#define ACTIVE_BOND_OPEN
+//#define MARGIN_OPEN
 
 #define MAXPOINT 1000
 #define EPS 0.02
@@ -44,8 +44,8 @@ int main(int argc, char** argv)
 	char* test_set = "src/data/2norm/2norm.test";
 	int DIM = 10;
 #else
-	char* train_set = "src/data/20news/politic-religion/train-tfidf.txt";
-	char* test_set = "src/data/20news/politic-religion/test-tfidf.txt";
+	char* train_set = "src/data/20news/pc-mac/train-tfidf.txt";
+	char* test_set = "src/data/20news/pc-mac/test-tfidf.txt";
 	int DIM = 61188;
 #endif
 #endif
@@ -160,16 +160,19 @@ int main(int argc, char** argv)
 	cnt=0;
 	for (int i=0;i<L;i++)
 	{
+		int num=0;
 		do
 		{
-			if (cnt >= trainVec.size())
-				break;
-			DataPoint dp = trainVec[cnt++];
+			//if (cnt >= trainVec.size())
+				//break;
+			if (num > trainVec.size()) break;
+			DataPoint dp = trainVec[(cnt++)%trainVec.size()];
+			num++;
 			perca->read(dp);
 		}while(i+1!=perca->getNumberOfLabel());
-
-		if (cnt >= trainVec.size())
-			break;
+		if (num > trainVec.size()) break;
+		//if (cnt >= trainVec.size())
+			//break;
 		if ((i+1)%(int)(L/BLOCK)==0 || i==L-1)
 		{
 			cor=0;
